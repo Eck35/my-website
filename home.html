@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页  </title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(to right, rgb(141, 163, 219), rgb(141, 144, 209));
+            color: white;
+            text-align: center;
+            position: relative; /* 添加这个 */
+        }
+        .nav {
+            margin: 20px 0;
+            position: relative; 
+            z-index: 2;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+        }
+        .nav a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .content {
+            margin-top: 50px;
+            position: relative;
+            z-index: 2;
+        }
+        
+    </style>
+    
+</head>
+
+<body>
+    <!-- 星星背景 -->
+    <div class="stars-background" id="stars"></div>
+    
+    <!-- 原有内容保持不变 -->
+    <div class="nav">
+        <a href="./index.html">首页</a>
+    </div>
+    
+    <div class="content">
+        <h1>Welcome to X's website!</h1>
+        <p>To be continue...</p>
+    </div>
+
+    
+</body>
+</html>
