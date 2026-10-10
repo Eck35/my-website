@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Say! 留言板</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(to right, rgb(141, 163, 219), rgb(141, 144, 209));
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+    }
+
+    .box {
+      width: 90%;
+      min-height: 750px;
+      background-color: white;
+      border-radius: 5px;
+      box-sizing: border-box;
+      padding-bottom: 20px;
+      margin-left: 5%;
+      box-shadow: 0 8px 24px rgba(90, 100, 160, 0.15);
+    }
+
+    .title {
+      font-size: 30px;
+      font-weight: 700;
+      margin-top: 40px;
+      text-align: center;
+      padding-top: 15px;
+      color: #4a5080;
+      letter-spacing: 2px;
+    }
+
+    /* 输入区 */
+    .add {
+      display: flex;
+      margin-top: 3%;
+      justify-content: center;
+    }
+
+    .input {
+      border: 1px solid #8280f4;
+      outline: none;
+      width: 50%;
+      height: 50px;
+      border-radius: 20px 0 0 20px;
+      padding-left: 5%;
+      box-sizing: border-box;
+      font-size: 15px;
+      color: #333;
+    }
+
+    .input:focus {
+      border-color: #6a67e0;
+      box-shadow: 0 0 0 3px rgba(130, 128, 244, 0.15);
+    }
+
+    .input::placeholder {
+      color: #a3a8c9;
+    }
+
+    .buttom {
+      border: 1px solid #8280f4;
+      outline: none;
+      width: 10%;
+      height: 50px;
+      border-radius: 0 20px 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      background: linear-gradient(to right, rgb(141, 163, 219), rgb(141, 144, 209));
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.2s;
+    }
+
+    .buttom:hover {
+      opacity: 0.9;
+    }
+
+    .buttom:active {
+      transform: scale(0.98);
+    }
+
+    /* 单条留言 */
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      width: 50%;
+      min-height: 30px;
+      margin: 30px auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid #b1b0fe;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .item-content {
+      display: flex;
+      align-items: flex-start;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .text-content {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .name {
+      display: block;
+      width: 100%;
+      word-break: break-word;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #444;
+    }
+
+    .time {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #a3a8c9;
+    }
+
+    .del {
+      color: rgb(209, 57, 57);
+      cursor: pointer;
+      font-size: 14px;
+      user-select: none;
+      flex-shrink: 0;
+      transition: color 0.2s;
+    }
+
+    .del:hover {
+      color: rgb(160, 30, 30);
+      text-decoration: underline;
+    }
+
+    /* 空状态 */
+    .empty {
+      text-align: center;
+      color: #b0b5d0;
+      font-size: 14px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="title">Say!</div>
+
+    <!-- 输入区 -->
+    <div class="add">
+      <input class="input" id="input" type="text" placeholder="写下你的留言……" />
+      <div class="buttom" id="publishBtn">发布</div>
+    </div>
+
+    <!-- 留言列表 -->
+    <div id="list"></div>
+
+  </div>
+
+  <script>
+    // 数据
+    let messages = []
+
+    // 元素
+    const inputEl = document.getElementById('input')
+    const publishBtn = document.getElementById('publishBtn')
+    const listEl = document.getElementById('list')
+    const emptyEl = document.getElementById('empty')
+
+    // 生成时间字符串
+    function now() {
+      const d = new Date()
+      const pad = (n) => String(n).padStart(2, '0')
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+    }
+
+    // 从本地读取
+    function load() {
+      try {
+        const saved = localStorage.getItem('messages')
+        messages = saved ? JSON.parse(saved) : []
+      } catch (e) {
+        messages = []
+      }
+    }
+
+    // 保存到本地
+    function save() {
+      localStorage.setItem('messages', JSON.stringify(messages))
+    }
+
+    // 渲染列表
+    function render() {
+      listEl.innerHTML = ''
+      emptyEl.style.display = messages.length === 0 ? 'block' : 'none'
+
+      messages.forEach((msg, index) => {
+        const item = document.createElement('div')
+        item.className = 'item'
+
+        const content = document.createElement('div')
+        content.className = 'item-content'
+
+        const textContent = document.createElement('div')
+        textContent.className = 'text-content'
+
+        const name = document.createElement('span')
+        name.className = 'name'
+        name.textContent = msg.text
+
+        const time = document.createElement('span')
+        time.className = 'time'
+        time.textContent = msg.time
+
+        textContent.appendChild(name)
+        textContent.appendChild(time)
+        content.appendChild(textContent)
+
+        const del = document.createElement('div')
+        del.className = 'del'
+        del.textContent = '删除'
+        del.addEventListener('click', () => remove(index))
+
+        item.appendChild(content)
+        item.appendChild(del)
+        listEl.appendChild(item)
+      })
+    }
+
+    // 发布留言
+    function publish() {
+      const text = inputEl.value.trim()
+      if (!text) return
+
+      messages.unshift({
+        text: text,
+        time: now()
+      })
+
+      inputEl.value = ''
+      save()
+      render()
+    }
+
+    // 删除留言
+    function remove(index) {
+      messages.splice(index, 1)
+      save()
+      render()
+    }
+
+    // 事件绑定
+    publishBtn.addEventListener('click', publish)
+    inputEl.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') publish()
+    })
+
+    // 初始化
+    load()
+    render()
+  </script>
+</body>
+</html>
